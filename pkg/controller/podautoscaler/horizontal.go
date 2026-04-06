@@ -235,10 +235,9 @@ func (a *HorizontalController) enqueueHPA(obj interface{}) {
 		return
 	}
 
-	// Requests are always added to queue with resyncPeriod delay.  If there's already
-	// request for the HPA in the queue then a new request is always dropped. Requests spend resync
-	// interval in queue so HPAs are processed every resync interval.
-	a.queue.AddRateLimited(key)
+	// Add the HPA to the queue for immediate processing. Deduplication is handled
+	// by the queue: if the key is already queued or being processed, this is a no-op.
+	a.queue.Add(key)
 
 	// Register HPA in the hpaSelectors map if it's not present yet. Attaching the Nothing selector
 	// that does not select objects. The actual selector is going to be updated
